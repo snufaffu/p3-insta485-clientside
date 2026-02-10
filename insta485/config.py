@@ -21,5 +21,5 @@ MAX_CONTENT_LENGTH = 16 * 1024 * 1024
 # Database file is var/insta485.sqlite3
 DATABASE_FILENAME = INSTA485_ROOT/'var'/'insta485.sqlite3'
 
-# Enable CSRF protection
-WTF_CSRF_ENABLED = True
+# Disabled for Project 3
+WTF_CSRF_ENABLED = False
