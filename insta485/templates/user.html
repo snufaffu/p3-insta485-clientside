@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ user.username }}</h1>
+<p>{{ user.fullname }}</p>
+
+{% if relationship %}
+<p>{{ relationship }}</p>
+
+{% if is_following %}
+<form
+    action="{{ url_for('update_following') }}?target={{ url_for('show_user', user_url_slug=user.username) }}"
+    method="post"
+    enctype="multipart/form-data"
+>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="submit" name="unfollow" value="unfollow" />
+    <input type="hidden" name="username" value="{{ user.username }}" />
+    <input type="hidden" name="operation" value="unfollow" />
+</form>
+{% else %}
+<form
+    action="{{ url_for('update_following') }}?target={{ url_for('show_user', user_url_slug=user.username) }}"
+    method="post"
+    enctype="multipart/form-data"
+>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="submit" name="follow" value="follow" />
+    <input type="hidden" name="username" value="{{ user.username }}" />
+    <input type="hidden" name="operation" value="follow" />
+</form>
+{% endif %}
+{% endif %}
+
+<p>{{ num_posts }} post{% if num_posts != 1 %}s{% endif %}</p>
+
+<a href="/users/{{ user.username }}/followers/">
+    {{ num_followers }} follower{% if num_followers != 1 %}s{% endif %}
+</a>
+
+<a href="/users/{{ user.username }}/following/">
+    {{ num_following }} following
+</a>
+
+{% if is_own_page %}
+<p><a href="/accounts/edit/">Edit profile</a></p>
+
+<form action="/accounts/logout/" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="submit" name="logout" value="Logout" />
+</form>
+
+<form
+    action="/posts/?target={{ url_for('show_user', user_url_slug=user.username) }}"
+    method="post"
+    enctype="multipart/form-data"
+>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="file" name="file" accept="image/*" required />
+    <input type="submit" name="create_post" value="upload new post" />
+    <input type="hidden" name="operation" value="create" />
+</form>
+{% endif %}
+
+<hr />
+
+{% if posts|length == 0 %}
+<p>No posts yet.</p>
+{% else %}
+{% for post in posts %}
+<a href="/posts/{{ post.postid }}/">
+    <img src="/uploads/{{ post.filename }}" alt="post {{ post.postid }}" />
+</a>
+{% endfor %}
+{% endif %}
+{% endblock %}

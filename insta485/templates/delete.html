@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Insta485</title>
+    </head>
+    <body>
+        <div>
+            <nav>
+                <h3>
+                    <a href="/">Home</a>
+                    <a href="/explore/">Explore</a>
+                    <a href="/users/{{ logname }}/">{{ logname }}</a>
+                </h3>
+            </nav>
+        </div>
+        <div><h3>Delete Account</h3></div>
+        <div>{{logname}}</div>
+        <div>
+            <form
+                action="/accounts/?target=/accounts/create/"
+                method="post"
+                enctype="multipart/form-data"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                />
+                <input
+                    type="submit"
+                    name="delete"
+                    value="confirm delete account"
+                />
+                <input type="hidden" name="operation" value="delete" />
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Insta485</title>
+    </head>
+    <body>
+        <div>
+            <nav>
+                <h3>
+                    <a href="/">Home</a>
+                    <a href="/explore/">Explore</a>
+                    <a href="/users/{{ logname }}/">{{ logname }}</a>
+                </h3>
+            </nav>
+        </div>
+        <div><h3>Edit Account</h3></div>
+        <div>
+            <img
+                src="/uploads/{{ user_photo }}"
+                width="100"
+                alt="{{ logname }} profile"
+            />{{ logname }}
+        </div>
+        <div>
+            <form
+                action="/accounts/?target=/accounts/edit/"
+                method="post"
+                enctype="multipart/form-data"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                />
+                <div>
+                    Photo <input type="file" name="file" accept="image/*" />
+                </div>
+                <div>
+                    Name
+                    <input
+                        type="text"
+                        name="fullname"
+                        value="{{ fullname }}"
+                        required
+                    />
+                </div>
+                <div>
+                    Email
+                    <input
+                        type="text"
+                        name="email"
+                        value="{{ email }}"
+                        required
+                    />
+                </div>
+                <div>
+                    <input type="submit" name="update" value="submit" />
+                    <input
+                        type="hidden"
+                        name="operation"
+                        value="edit_account"
+                    />
+                </div>
+            </form>
+        </div>
+        <div>
+            <h3><a href="/accounts/password/">Change password</a></h3>
+        </div>
+        <div>
+            <h3><a href="/accounts/delete/">Delete account</a></h3>
+        </div>
+    </body>
+</html>

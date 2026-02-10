@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Following</h1>
+
+{% for user in following %}
+<div>
+    <img src="/uploads/{{ user.user_img_url }}" alt="{{ user.username }}" />
+    <p><a href="/users/{{ user.username }}/">{{ user.username }}</a></p>
+
+    {% if user.username != logname %}
+        {% if user.logname_follows_username %}
+            <p>following</p>
+            <form
+                action="/following/?target={{ url_for('show_following', user_url_slug=user_url_slug) }}"
+                method="post"
+            >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="operation" value="unfollow" />
+                <input type="hidden" name="username" value="{{ user.username }}" />
+                <input type="submit" name="unfollow" value="unfollow" />
+            </form>
+        {% else %}
+            <p>not following</p>
+            <form
+                action="/following/?target={{ url_for('show_following', user_url_slug=user_url_slug) }}"
+                method="post"
+            >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="operation" value="follow" />
+                <input type="hidden" name="username" value="{{ user.username }}" />
+                <input type="submit" name="follow" value="follow" />
+            </form>
+        {% endif %}
+    {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

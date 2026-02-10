@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Followers of {{ user_url_slug }}</h1>
+
+{% for f in followers %}
+<div>
+    <img src="/uploads/{{ f.filename }}" alt="{{ f.username }} icon" />
+    <a href="/users/{{ f.username }}/">{{ f.username }}</a>
+
+    {% if f.relationship %}
+    <span>{{ f.relationship }}</span>
+
+    {% if f.is_following %}
+    <form
+        action="/following/?target={{ url_for('show_followers', user_url_slug=user_url_slug) }}"
+        method="post"
+        enctype="multipart/form-data"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="submit" name="unfollow" value="unfollow" />
+        <input type="hidden" name="username" value="{{ f.username }}" />
+        <input type="hidden" name="operation" value="unfollow" />
+    </form>
+    {% else %}
+    <form
+        action="/following/?target={{ url_for('show_followers', user_url_slug=user_url_slug) }}"
+        method="post"
+        enctype="multipart/form-data"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="submit" name="follow" value="follow" />
+        <input type="hidden" name="username" value="{{ f.username }}" />
+        <input type="hidden" name="operation" value="follow" />
+    </form>
+    {% endif %}
+    {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

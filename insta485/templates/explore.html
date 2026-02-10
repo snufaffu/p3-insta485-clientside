@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>insta485</title>
+    </head>
+    <body>
+        <h3><a href="/">Return to main</a></h3>
+        <h3><a href="/explore/">Explore</a></h3>
+        <h3><a href="/users/{{logname}}/">{{logname}}</a></h3>
+
+        <h1>Discover People</h1>
+        {% for people in follow_people %}
+        <img src="/uploads/{{people.filename}}" alt="{{people.username}}" />
+        <p><a href="/users/{{people.username}}/">{{people.username}}</a></p>
+
+        <form
+            action="/following/?target={{ url_for('explore_page') }}"
+            method="post"
+        >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="operation" value="follow" />
+            <input
+                type="hidden"
+                name="username"
+                value="{{ people.username }}"
+            />
+            <input type="submit" name="follow" value="follow" />
+        </form>
+        {% endfor %}
+    </body>
+</html>

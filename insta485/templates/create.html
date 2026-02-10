@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Insta485</title>
+    </head>
+    <body>
+        <div>
+            <nav>
+                <h3>
+                    <a href="/">Home</a> <a href="/accounts/login/">Login</a>
+                </h3>
+            </nav>
+        </div>
+        <div><h3>Create Account</h3></div>
+        <div>
+            <form
+                action="/accounts/?target=/"
+                method="post"
+                enctype="multipart/form-data"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                />
+                <div>Photo <input type="file" name="file" required /></div>
+                <div>Name <input type="text" name="fullname" required /></div>
+                <div>
+                    Username <input type="text" name="username" required />
+                </div>
+                <div>Email <input type="text" name="email" required /></div>
+                <div>
+                    Password <input type="password" name="password" required />
+                </div>
+                <div>
+                    <input type="submit" name="signup" value="sign up" />
+                    <input type="hidden" name="operation" value="create" />
+                </div>
+            </form>
+        </div>
+        <div>Have an account? <a href="/accounts/login/">Login</a></div>
+    </body>
+</html>
