@@ -1,1 +1,4 @@
 env/
+insta485/views/__pycache__
+insta485/__pycache__
+insta485.egg-info/
