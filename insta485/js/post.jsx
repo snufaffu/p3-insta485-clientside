@@ -23,6 +23,8 @@ export default function Post({ url }) {
   const [postID, setPostID] = useState(null);
   // const [postComment, setComment] = useState(0);
   const [humantime, setHumanTime] = useState(() => Date.now());
+  const [commentText, setCommentText] = useState("");
+  const [commentsUrl, setCommentsUrl] = useState(null);
 
   const handleLikes = () => {
     // console.log("hello??");
@@ -37,7 +39,7 @@ export default function Post({ url }) {
         return;
       }
       let likeid = likes.url.split("/")[4];
-      target = `/api/v1/likes/${likeid}`;
+      target = `/api/v1/likes/${likeid}/`;
     }
     // const notIsCurrentlyLiked = !isCurrentlyLiked;
     const method = isCurrentlyLiked ? "DELETE" : "POST";
@@ -62,6 +64,62 @@ export default function Post({ url }) {
         }));
       })
       .catch((error) => console.error("Error updating likes", error));
+  };
+
+  const handleDoubleClick = () => {
+    if (!likes.lognameLikesThis) {
+      handleLikes();
+    }
+  };
+
+  const handleSubmitComment = (event) => {
+    // Prevent page from reloading
+    event.preventDefault();
+
+    // Make sure comments url exists, so we know the url for the REST API
+    if (!commentsUrl) {
+      return;
+    }
+
+    // Get comment text (allow posting an empty comment)
+    const text = commentText.trim();
+    // if (!text) {
+    //   return;
+    // }
+
+    // Send new comment to backend using REST API, then add comment to DOM
+    fetch(commentsUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+      credentials: "same-origin",
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw Error(response.statusText);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setComments((prev) => [...prev, data]);
+        setCommentText("");
+      })
+      .catch((error) => console.error("Error posting new comment", error));
+  };
+
+  const handleDeleteComment = (comment) => {
+    fetch(comment.url, { method: "DELETE", credentials: "same-origin" })
+      .then((response) => {
+        if (response.status !== 204) {
+          throw Error(response.statusText);
+        }
+      })
+      .then(() => {
+        setComments((prev) =>
+          prev.filter((c) => c.commentid !== comment.commentid),
+        );
+      })
+      .catch((error) => console.error("Error deleting comment", error));
   };
 
   useEffect(() => {
@@ -96,6 +154,7 @@ export default function Post({ url }) {
           setLikes(data.likes);
           setTimestamp(data.created);
           setPostID(data.postid);
+          setCommentsUrl(data.comments_url);
         }
       })
       .catch((error) => console.log(error));
@@ -111,7 +170,7 @@ export default function Post({ url }) {
   // Render post image and post owner
   return (
     <div className="post">
-      <img src={imgUrl} alt="post_image" />
+      <img src={imgUrl} alt="post_image" onDoubleClick={handleDoubleClick} />
       <p>
         <a href={ownerUrl}>
           {" "}
@@ -125,7 +184,11 @@ export default function Post({ url }) {
         </a>
       </p>
       <p>{likes.numLikes == 1 ? "1 like" : `${likes.numLikes} likes`}</p>
-      <button onClick={handleLikes} data-testid="like-unlike-button"disabled={postID === null}>
+      <button
+        onClick={handleLikes}
+        data-testid="like-unlike-button"
+        disabled={postID === null}
+      >
         {likes.lognameLikesThis ? "unlike" : "like"}
       </button>
       <div className="comments">
@@ -135,11 +198,27 @@ export default function Post({ url }) {
               <a href={comment.ownerShowUrl}>
                 <span>{comment.owner}</span>
               </a>
-              {comment.text}
+              <span data-testid="comment-text">{comment.text}</span>
+              {comment.lognameOwnsThis ? (
+                <button
+                  type="button"
+                  data-testid="delete-comment-button"
+                  onClick={() => handleDeleteComment(comment)}
+                >
+                  Delete comment
+                </button>
+              ) : null}
             </p>
           </div>
         ))}
       </div>
+      <form data-testid="comment-form" onSubmit={handleSubmitComment}>
+        <input
+          type="text"
+          value={commentText}
+          onChange={(event) => setCommentText(event.target.value)}
+        />
+      </form>
     </div>
   );
 }
