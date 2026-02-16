@@ -203,6 +203,7 @@ export default function Post({ url }) {
                 <button
                   type="button"
                   data-testid="delete-comment-button"
+                  disabled={postID === null}
                   onClick={() => handleDeleteComment(comment)}
                 >
                   Delete comment
@@ -216,6 +217,7 @@ export default function Post({ url }) {
         <input
           type="text"
           value={commentText}
+          disabled={postID === null}
           onChange={(event) => setCommentText(event.target.value)}
         />
       </form>
