@@ -1,13 +1,8 @@
 """REST API for comments."""
 import flask
 import insta485
-from insta485.api.main import require_auth_or_403
-
-
-def _abort_404_if_post_missing(connection, postid: int) -> None:
-    cur = connection.execute("SELECT 1 FROM posts WHERE postid = ?", (postid,))
-    if cur.fetchone() is None:
-        flask.abort(404)
+from insta485.api.main import require_auth_or_403, _abort_404_if_post_missing
+from insta485.api.main import check_row_errors
 
 
 @insta485.app.route("/api/v1/comments/", methods=["POST"])
@@ -15,11 +10,7 @@ def create_comment():
     """Create a comment on a post. Return 201 and the new comment object."""
     logname = require_auth_or_403()
     connection = insta485.model.get_db()
-
     postid = flask.request.args.get("postid", type=int)
-    if postid is None:
-        flask.abort(400)
-
     _abort_404_if_post_missing(connection, postid)
 
     text = None
@@ -51,7 +42,11 @@ def create_comment():
 
 @insta485.app.route("/api/v1/comments/<int:commentid>/", methods=["DELETE"])
 def delete_comment(commentid):
-    """Delete a comment. Return 204 on success, 404 if missing, 403 if not owner."""
+    """
+    Delete a comment. Return 204 on success.
+
+    404 if missing, 403 if not owner.
+    """
     logname = require_auth_or_403()
     connection = insta485.model.get_db()
 
@@ -60,10 +55,8 @@ def delete_comment(commentid):
         (commentid,),
     )
     row = cur.fetchone()
-    if row is None:
-        flask.abort(404)
-    if row["owner"] != logname:
-        flask.abort(403)
+    check_row_errors(row, logname)
 
-    connection.execute("DELETE FROM comments WHERE commentid = ?", (commentid,))
+    sql_statement = "DELETE FROM comments WHERE commentid = ?"
+    connection.execute(sql_statement, (commentid,))
     return ("", 204)

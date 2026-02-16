@@ -1,7 +1,8 @@
 """REST API for general functions."""
+import hashlib
 import flask
 import insta485
-import hashlib
+
 
 @insta485.app.route('/api/v1/')
 def get_services():
@@ -14,21 +15,42 @@ def get_services():
     }
     return flask.jsonify(**context)
 
+
+def _abort_404_if_post_missing(connection, postid: int) -> None:
+    """..."""
+    if postid is None:
+        flask.abort(400)
+    cur = connection.execute("SELECT 1 FROM posts WHERE postid = ?", (postid,))
+    if cur.fetchone() is None:
+        flask.abort(404)
+
+
+def check_row_errors(row, logname):
+    """..."""
+    if row is None:
+        flask.abort(404)
+    if row["owner"] != logname:
+        flask.abort(403)
+
+
 def verify_password(connection, username, password):
-    """Verify password against algorithm$salt$hash in DB; abort(403) if wrong."""
+    """Verify password against algorithm$salt$hash in DB.
+
+    abort(403) if wrong.
+    """
     cur = connection.execute(
         "SELECT password FROM users WHERE username = ?",
         (username,),
     )
 
-    row = cur.fetchone()
-    if row is None:
+    data = cur.fetchone()
+    if data is None:
         flask.abort(403)
 
-    password_db_string = row["password"]
+    pass_string = data["password"]
 
     try:
-        algorithm, salt, stored_password_hash = password_db_string.split("$")
+        algorithm, salt, stored_password_hash = pass_string.split("$")
     except ValueError:
         flask.abort(403)
 
@@ -46,8 +68,9 @@ def verify_password(connection, username, password):
 
 
 def require_auth_or_403():
-    """
-    Return logname if authenticated via session or HTTP Basic, else abort(403).
+    """Return logname if authenticated via session or HTTP Basic.
+
+    Else abort(403).
     """
     # Session cookie auth (browser)
     if "username" in flask.session:

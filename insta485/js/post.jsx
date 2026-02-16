@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useInsertionEffect } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
@@ -38,32 +38,30 @@ export default function Post({ url }) {
       if (!likes.url) {
         return;
       }
-      let likeid = likes.url.split("/")[4];
+      const likeid = likes.url.split("/").filter(Boolean).pop();
       target = `/api/v1/likes/${likeid}/`;
     }
     // const notIsCurrentlyLiked = !isCurrentlyLiked;
     const method = isCurrentlyLiked ? "DELETE" : "POST";
-    const newNumLikes = isCurrentlyLiked
-      ? likes.numLikes - 1
-      : likes.numLikes + 1;
-    fetch(target, {
-      method: method,
-      credentials: "same-origin",
-    })
+
+    fetch(target, { method, credentials: "same-origin" })
       .then((response) => {
-        if (!response.ok) throw Error(response.statusText);
-        return response.status === 204 ? {} : response.json();
+        if (!response.ok) throw new Error(response.statusText);
+        if (method === "POST") return response.json(); // 201/200 with JSON
+        return null; // DELETE 204: no body
       })
       .then((data) => {
-        console.log("Like API Response:", data);
-        setLikes((prev) => ({
-          ...prev,
-          numLikes: isCurrentlyLiked ? prev.numLikes - 1 : prev.numLikes + 1,
+        const newNumLikes = isCurrentlyLiked
+          ? likes.numLikes - 1
+          : likes.numLikes + 1;
+
+        setLikes({
           lognameLikesThis: !isCurrentlyLiked,
-          url: data.url || null,
-        }));
+          numLikes: newNumLikes,
+          url: method === "POST" ? data.url : null,
+        });
       })
-      .catch((error) => console.error("Error updating likes", error));
+      .catch((err) => console.error("Error updating likes", err));
   };
 
   const handleDoubleClick = () => {

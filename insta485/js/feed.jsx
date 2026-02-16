@@ -35,7 +35,7 @@ export default function Feed() {
 
   useEffect(() => {
     let ignoreStaleRequest = false;
-    fetch(nextUrl, { credentials: "same-origin" })
+    fetch("/api/v1/posts/", { credentials: "same-origin" })
       .then((response) => {
         if (!response.ok) throw Error(response.statusText);
         return response.json();
